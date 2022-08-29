@@ -1,0 +1,135 @@
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+import java.util.List;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+import javax.swing.JScrollBar;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.Color;
+import java.awt.Font;
+
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+
+public class ElectionListPanel extends JPanel {
+
+	/**
+	 * Create the panel.
+	 */
+	DefaultListModel<ElectionModel> dm=new DefaultListModel<ElectionModel>();
+	List<ElectionModel> elections;
+	AdminDashboardPanel parentPanel = null;
+	UserDashboardPanel loginpanel = null;
+
+	public ElectionListPanel(List<ElectionModel> elections,AdminDashboardPanel parentPanel, UserDashboardPanel loginpanel) {
+		setBackground(Color.WHITE);
+
+		this.elections = elections;
+		this.parentPanel = parentPanel;
+		this.loginpanel = loginpanel;
+		//		JList<ElectionModel> jList1 = new JList<ElectionModel>();
+		//		jList1.setVisibleRowCount(10);
+		//		ElectionModel election1 = new ElectionModel("ELection 1",1,"23/33/4444","33/44/3333");
+		//		ElectionModel election2 = new ElectionModel("ELection 2",1,"23/33/4444","33/44/3334");
+		//		ElectionModel election3 = new ElectionModel("ELection 3",1,"23/33/4444","33/44/3335");
+		//		ElectionModel election4 = new ElectionModel("ELection 4",1,"23/33/4444","33/44/3336");
+		//		
+		//		
+		//		 dm.addElement(election1);
+		//		 dm.addElement(election2);
+		//		 dm.addElement(election3);
+		//		 dm.addElement(election4);
+		//	        //RENDER IMAGES N TEXT
+		//	        jList1.setCellRenderer(new ElectionListRenderer());
+		//	        jList1.setModel(dm);
+		//		setLayout(null);
+
+		//		ElectionModel election1 = new ElectionModel("ELection 1",1,"23/33/4444","33/44/3333", null);
+		//		ElectionModel election2 = new ElectionModel("ELection 2",1,"23/33/4444","33/44/3334", null);
+		//		ElectionModel election3 = new ElectionModel("ELection 3",1,"23/33/4444","33/44/3335", null);
+		//		ElectionModel election4 = new ElectionModel("ELection 4",1,"23/33/4444","33/44/3336", null);
+
+		String[] columnNames = {"Election ID", "ElectionName","StartDate","End Date"};
+		Object[][] data = new Object[elections.size()][4];
+
+		for(int i=0;i<elections.size();i++) {
+			data[i][0] = elections.get(i).electionID;
+			data[i][1] = elections.get(i).electionName;
+			data[i][2] = elections.get(i).stratDateTime;
+			data[i][3] = elections.get(i).endDateTime;
+		}
+
+		//	        {
+			//	            {"ELection 1",1,"23/33/4444","33/44/3333"},
+		//	            {"ELection 1",1,"23/33/4444","33/44/3333"},
+		//	            {"ELection 1",1,"23/33/4444","33/44/3333"},
+		//	            {"ELection 1",1,"23/33/4444","33/44/3333"}
+		//	        };
+
+		DefaultTableModel model = new DefaultTableModel(data, columnNames)
+		{
+			//  Returning the Class of each column will allow different
+			//  renderers to be used based on Class
+			public Class getColumnClass(int column)
+			{
+				return getValueAt(0, column).getClass();
+			}
+		};
+		setLayout(null);
+		JTable table = new JTable( model );
+		table.setBorder(null);
+
+
+		JButton btnViewDetails = new JButton("View Details");
+		btnViewDetails.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					int row = table.getSelectedRow();
+					if (parentPanel == null){
+						loginpanel.showElectionDetails(elections.get(row));
+					}else {
+						parentPanel.showElectionDetails(elections.get(row));
+
+					}
+
+				}catch(Exception ex) {
+
+				}
+
+			}
+		});
+		btnViewDetails.setBounds(650, 108, 123, 23);
+		add(btnViewDetails);
+		table.setPreferredScrollableViewportSize(table.getPreferredSize());
+		table.setDefaultEditor(Object.class, null);
+//		table.setBorder(null);
+
+		JScrollPane scrollPane = new JScrollPane( table );
+		scrollPane.setViewportBorder(null);
+		scrollPane.setBounds(0, 108, 640, 500);
+		scrollPane.getViewport().setBackground(Color.WHITE);
+		scrollPane.setBorder(new EmptyBorder(1, 0, 0, 0));
+//		scrollPane.setViewportBorder(null);
+
+
+		add( scrollPane );
+		
+		JLabel lblElections = new JLabel("Total Elections");
+		lblElections.setHorizontalAlignment(SwingConstants.CENTER);
+		lblElections.setFont(new Font("Tahoma", Font.PLAIN, 24));
+
+		lblElections.setBounds(262, 35, 337, 28);
+		add(lblElections);
+
+
+
+	}
+}

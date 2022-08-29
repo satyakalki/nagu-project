@@ -1,0 +1,161 @@
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JTable;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.Color;
+import java.awt.Font;
+
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+
+public class AddLocalityPanel extends JPanel {
+	private JTextField textField;
+	private JTable table;
+	private JScrollPane scrollPane;
+	List<String> localities;
+	DBRepoManager repo=new DBRepoManager();
+	/**
+	 * Create the panel.
+	 */
+	public AddLocalityPanel() {
+		setBackground(Color.WHITE);
+		setLayout(null);
+
+		JLabel lblPleaseEnterLocality = new JLabel("Please Enter Locality");
+		lblPleaseEnterLocality.setBounds(136, 103, 146, 28);
+		add(lblPleaseEnterLocality);
+
+		textField = new JTextField();
+		textField.setBounds(292, 107, 250, 20);
+		textField.setText("");
+		add(textField);
+		textField.setColumns(10);
+
+		JButton btnAdd = new JButton("Add");
+		btnAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String text = textField.getText();
+
+
+				if (text.toCharArray().length == 0) {
+					System.out.println("empty etxt");
+
+					JOptionPane.showMessageDialog(null, "Location name should not be empty");
+
+				}else {
+					System.out.println("localoty added text"+text);
+					int res=repo.AddNewLocality(text);
+					if(res==1)
+					{
+						JOptionPane.showMessageDialog(null, "Location name added sucessfully");
+
+						if (!scrollPane.isVisible()) {
+							scrollPane.setVisible(true);
+						}
+
+						localities.add(text);
+						textField.setText("");
+						String[] columnNames = {"Location Name"};
+						localities = new DBRepoManager().getAllLocalities();
+
+						Object[][] options = new Object[localities.size()][1];
+						for (int i = 0;i<localities.size();i++){
+							options[i][0] = localities.get(i);
+						}
+						DefaultTableModel model = new DefaultTableModel(options, columnNames)
+						{
+							//  Returning the Class of each column will allow different
+							//  renderers to be used based on Class
+							public Class getColumnClass(int column)
+							{
+								return getValueAt(0, column).getClass();
+							}
+						};
+
+						table.setModel(model);
+						table.revalidate();
+						table.repaint();
+					}else
+					{
+						JOptionPane.showMessageDialog(null, "Some thing went wrong,please try after some time !!!");
+					}
+
+					//					
+
+
+				}
+			}
+		});
+		btnAdd.setBounds(552, 106, 89, 23);
+		add(btnAdd);
+
+		createTable();
+
+		JLabel lblElections = new JLabel("Add Locality");
+		lblElections.setHorizontalAlignment(SwingConstants.CENTER);
+		lblElections.setFont(new Font("Tahoma", Font.PLAIN, 24));
+
+		lblElections.setBounds(262, 35, 337, 28);
+		add(lblElections);
+
+	}
+
+	void createTable() {
+
+		String[] columnNames = {"Location Name"};
+
+		localities = new DBRepoManager().getAllLocalities();
+		
+		
+
+		Object[][] options = new Object[localities.size()][1];
+		for (int i = 0;i<localities.size();i++){
+			options[i][0] = localities.get(i);
+		}
+		DefaultTableModel model = new DefaultTableModel(options, columnNames)
+		{
+			//  Returning the Class of each column will allow different
+			//  renderers to be used based on Class
+			public Class getColumnClass(int column)
+			{
+				return getValueAt(0, column).getClass();
+			}
+		};
+
+		table = new JTable(model);
+
+	
+
+
+		table.setPreferredScrollableViewportSize(table.getPreferredSize());
+		table.setDefaultEditor(Object.class, null);
+
+		 scrollPane = new JScrollPane( table );
+		scrollPane.setViewportBorder(null);
+		scrollPane.setBounds(0, 192, 790, 152);
+		scrollPane.getViewport().setBackground(Color.WHITE);
+		scrollPane.setBorder(new EmptyBorder(1, 0, 0, 0));
+		add(scrollPane);
+		if (localities.isEmpty()) {
+			
+			scrollPane.setVisible(false);
+		}
+		
+
+
+
+		//		table.setBackground(Color.WHITE);
+		//		table.setBounds(0, 192, 790, 152);
+		//		add(table);
+	}
+}

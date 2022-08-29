@@ -1,0 +1,759 @@
+import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;  
+public class DBRepoManager {
+	
+	private  Connection conn=null;
+	private static Statement stmt = null;
+	
+	public DBRepoManager()
+	{
+		DBrepo repo=new DBrepo();
+		conn=repo.getConnection();
+	}
+	
+	public int ValidateLogin(String UserName,String Password)
+
+	{
+		int id=3;
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql = "SELECT usertype FROM users where EmailId='"+UserName+"' and Password='"+Password+"'";
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name
+		           id = rs.getInt("usertype");
+		          
+
+		          //Display values
+		          //System.out.print("ID: " + id);
+		          
+		       }
+		      rs.close();
+		      
+		      
+					
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		return id;
+	}
+
+	
+	
+	//returns 0 :exception
+	//1 if addd user sucessfully
+	//2 if user alredy exists
+	//3 if age not met
+	public int registerUser(String UserName,String Password,String AdharNumber,int age,String HasHKey,String Locality,String Gender)
+	{
+		int result=0;
+		try {
+			
+					stmt = conn.createStatement();
+					String sql;
+					
+					if(age>18)
+					{
+					sql="SELECT count(UserId) AS rowcount FROM users  WHERE EmailId='"+UserName+"'";
+					  ResultSet rs=stmt.executeQuery(sql);
+					  rs.next();
+					  int count = rs.getInt("rowcount");
+					  rs.close();
+					  if(count>0)
+					  {
+						  stmt.close();
+						  return 2;
+					  }else
+					  {
+					
+					sql ="Insert into users (EmailId,Password,Age,AdharNumber,Hashkey,UserType,VoteStatus,Locality,Gender) Values('"+UserName+"','"+Password+"','"+age+"','"+AdharNumber+"','"+HasHKey+"','2',0,'"+Locality+"','"+Gender+"')";
+					stmt.executeUpdate(sql);
+					stmt.close();
+					return 1;
+					  }
+					}
+					else
+					{
+						return 3;
+					}
+			}		
+		catch(SQLException se){
+				//Handle errors for JDBC
+				se.printStackTrace();
+				return result;
+		}catch(Exception e){
+			//Handle errors for Class.forName
+			e.printStackTrace();
+			return result;
+		}
+		
+		
+	}
+
+	public int ScheduleElection(String Locality,String Startdate,String Enddate)
+	{
+		int result=0;
+		try {
+			System.out.println(Startdate);
+			stmt = conn.createStatement();
+			String sql;
+			sql="SELECT COUNT(ElectionId) AS rowcount FROM electionmaster WHERE Locality='"+Locality+"'";
+			  ResultSet rs=stmt.executeQuery(sql);
+			  rs.next();
+			  int count = rs.getInt("rowcount");
+			  if(count>0)
+			  {
+				  stmt.close();
+				  result= 2;
+			  }else
+			  {
+			
+			sql ="Insert into electionmaster (Locality,StartDate,EndDate) Values('"+Locality+"','"+Startdate+"','"+Enddate+"')";
+			stmt.executeUpdate(sql);
+//			sql="ALTER TABLE users ADD COLUMN "+Locality +" INT DEFAULT 0";
+//			stmt.execute(sql);
+			stmt.close();
+			result= 1;
+			  }
+		
+		}		
+		catch(SQLException se){
+				//Handle errors for JDBC
+				se.printStackTrace();
+				
+		}catch(Exception e){
+			//Handle errors for Class.forName
+			e.printStackTrace();
+			
+		}
+		return result;
+	}
+
+	public List<CandidateModel> GetCandiadtesForUser(String UserName)
+	{
+		List<CandidateModel> login=new ArrayList<CandidateModel>();
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql="SELECT c.CandidateParty,c.CandidateName,c.TotalVotes FROM `users` U left join candidates c on c.Locality=U.Locality left JOIN electionmaster em on em.Locality=c.Locality WHERE EmailId='"+UserName+"'";
+		      
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name		           
+		          login.add(new CandidateModel(rs.getString("CandidateParty"),rs.getString("CandidateName"),rs.getInt("TotalVotes")));
+
+		          
+		       }
+		      rs.close();
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		return login;
+		      
+	}
+	
+	public List<CandidateModel> GetCandiadtesForLocation(String Location)
+	{
+		List<CandidateModel> login=new ArrayList<CandidateModel>();
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql="SELECT CandidateName,CandidateParty,TotalVotes FROM candidates WHERE Locality='"+Location+"'";
+		      
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name		           
+		          login.add(new CandidateModel(rs.getString("CandidateParty"),rs.getString("CandidateName"),rs.getInt("TotalVotes")));
+
+		          
+		       }
+		      rs.close();
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		return login;
+		      
+	}
+	
+	public ElectionModel getElectionDetailsuser(String UserName)
+	{
+		ElectionModel electionmodel=new ElectionModel();
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql = "SELECT em.ElectionId,em.Locality,em.StartDate,em.EndDate FROM users U join electionmaster em on em.Locality=u.Locality where EmailId='"+UserName+"'";
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name
+		    	  electionmodel.electionID=rs.getInt("ElectionId");
+		    	  electionmodel.electionName=rs.getString("Locality");
+		    	  electionmodel.endDateTime=rs.getString("EndDate");
+		    	  electionmodel.stratDateTime=rs.getString("StartDate");  	  
+		          
+
+		          //Display values
+		          //System.out.print("ID: " + id);
+		          
+		       }
+		      rs.close();
+		      
+		      electionmodel.candidates=this.GetCandiadtesForUser(UserName);
+					
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		
+		
+		
+		return electionmodel;
+		
+		
+		
+	}
+	
+	//return 0 if not voted,if voted return 1,return 2 if call failed
+	public int UserVoted(String UserName)
+	{
+		int id=2;
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql = "SELECT VoteStatus FROM users where EmailId='"+UserName+"'";
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name
+		           id = rs.getInt("VoteStatus");
+		          
+
+		          //Display values
+		          //System.out.print("ID: " + id);
+		          
+		       }
+		      rs.close();
+		      
+		      
+					
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		return id;
+	}
+
+	//return 0 not started,1 inprogress,2 over,3 error
+	public int UserElectionStatus(String UserName)
+	{
+		int id=3;
+		String StartDate ,EndDate,CurrentDate;
+		StartDate =EndDate=CurrentDate=null;
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      
+		     sql = "SELECT em.StartDate,em.EndDate,DATE_FORMAT(NOW(),'%d/%m/%Y %H:%i:%s') AS CurrentDate FROM `users` U left JOIN electionmaster em on em.Locality=u.Locality WHERE EmailId='"+UserName+"'";
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name
+		    	  StartDate = rs.getString("StartDate");
+		    	  EndDate = rs.getString("EndDate");
+		    	  CurrentDate=rs.getString("CurrentDate");
+
+		          //Display values
+		          //System.out.print("ID: " + id);
+		          
+		       }
+		      rs.close();
+		      /*SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");  
+			    Date date = new Date();  
+			     CurrentDate=formatter.format(date);*/
+		      
+		     
+		  /*	String StartDate="2018-10-06 13:08:50";
+			String EndDate="2018-10-07 13:20:51";
+			 String CurrentDate="2018-10-08 11:20:51";*/
+		      
+		      
+		      
+		      if(CurrentDate.compareTo(EndDate)>0)
+		      {
+		    	  id=2;
+		    	  System.out.println("Election over");
+		      }
+		      else if(CurrentDate.compareTo(StartDate)>0)
+		      {
+		    	  id=1;
+		    	  System.out.println("Election startde");
+		      }
+		      else if (CurrentDate.compareTo(StartDate)<0)
+		      {
+		    	  id=0;
+		    	  System.out.println("Election not startde");
+		      }
+		      else 
+		      {
+		    	  System.out.println("Election error");
+		      }
+					
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		
+		 
+		 return id;
+	}
+	
+	
+	//return 0 not started,1 inprogress,2 over,3 error
+		public int getElectionStatusByLocality(String Locality)
+		{
+			int id=3;
+			String StartDate ,EndDate,CurrentDate;
+			StartDate =EndDate=CurrentDate=null;
+			try {
+				
+				stmt = conn.createStatement();
+			      String sql;
+			      
+			     sql = "SELECT StartDate,EndDate,DATE_FORMAT(NOW(),'%d/%m/%Y %H:%i:%s') AS CurrentDate FROM  electionmaster where Locality='"+Locality+"'";
+			      
+			      ResultSet rs = stmt.executeQuery(sql);
+			      while(rs.next()){
+			          //Retrieve by column name
+			    	  StartDate = rs.getString("StartDate");
+			    	  EndDate = rs.getString("EndDate");
+			    	  CurrentDate=rs.getString("CurrentDate");
+
+			          //Display values
+			          //System.out.print("ID: " + id);
+			          
+			       }
+			      rs.close();
+			      /*SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");  
+				    Date date = new Date();  
+				     CurrentDate=formatter.format(date);*/
+			      
+			     
+			  /*	String StartDate="2018-10-06 13:08:50";
+				String EndDate="2018-10-07 13:20:51";
+				 String CurrentDate="2018-10-08 11:20:51";*/
+			      System.out.println(CurrentDate);
+			      System.out.println(EndDate);
+			      if(CurrentDate.compareTo(EndDate)>0)
+			      {
+			    	  id=2;
+			    	  System.out.println("Election over");
+			      }
+			      else if(CurrentDate.compareTo(StartDate)>0)
+			      {
+			    	  id=1;
+			    	  System.out.println("Election startde");
+			      }
+			      else if (CurrentDate.compareTo(StartDate)<0)
+			      {
+			    	  id=0;
+			    	  System.out.println("Election not startde");
+			      }
+			      else 
+			      {
+			    	  System.out.println("Election error");
+			      }
+						
+			}		
+			catch(SQLException se){
+			      //Handle errors for JDBC
+			      se.printStackTrace();
+			   }catch(Exception e){
+			      //Handle errors for Class.forName
+			      e.printStackTrace();
+			   }
+			
+			 
+			 return id;
+		}
+		
+
+	
+	//return -1 if error else return count
+	public int scheduleElectionCOunt(String UserName)
+	{
+		int id=-1;
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql = "SELECT COUNT(U.`Locality`) as Count FROM `users` U join electionmaster EM on EM.Locality=U.`Locality` Where EmailId='"+UserName+"'";
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name
+		           id = rs.getInt("Count");
+		          
+
+		          //Display values
+		          //System.out.print("ID: " + id);
+		          
+		       }
+		      rs.close();
+		      
+		      
+					
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		return id;
+	}
+
+	public String UserHashkey(String UserName)
+	{
+		String HashKey=null;
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql = "SELECT HashKey FROM users where EmailId='"+UserName+"'";
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name
+		    	  HashKey = rs.getString("HashKey");		          
+
+		          //Display values
+		          //System.out.print("ID: " + id);
+		          
+		       }
+		      rs.close();
+		      
+		      
+					
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		return HashKey;
+		
+	}
+	
+	public int Vote(String Locality,String UserName,String CandidateName,String PartyName)
+	{
+		int isvotedsucessfully=0;
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      
+		      
+		      sql ="UPDATE users SET VoteStatus=1 WHERE EmailId='"+UserName+"'";
+				stmt.executeUpdate(sql);
+				sql="UPDATE candidates SET TotalVotes=TotalVotes+1 WHERE CandidateName='"+CandidateName+"' and Locality='"+Locality+"' and CandidateParty='"+PartyName+"'";
+				stmt.executeUpdate(sql);
+				stmt.close();
+				isvotedsucessfully=1;
+		      
+		      
+					
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		return isvotedsucessfully;
+		
+	}
+
+	public List<String> getAllLocalities()
+	{
+		List<String> locations=new ArrayList<String>();
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql="SELECT LocalityName FROM localitytable";
+		      
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name		           
+		    	  locations.add(new String(rs.getString("LocalityName")));
+
+		          
+		       }
+		      rs.close();
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		return locations;
+	}
+	
+	public int AddNewLocality(String Locality)
+	{
+		int addnewlocality=0;
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      
+		      
+		      sql ="INSERT INTO localitytable (LocalityName) VALUES ('"+Locality+"')";
+				stmt.executeUpdate(sql);
+				
+				stmt.close();
+				addnewlocality=1;
+		      
+		      
+					
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		return addnewlocality;
+	}
+
+	public List<ElectionModel> getAllElectionDetails()
+	{
+		List<ElectionModel> electionmodel=new ArrayList<ElectionModel>();
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql = "SELECT ElectionId,Locality,StartDate,EndDate FROM electionmaster";
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name
+		    	  String locatlty=rs.getString("Locality"); 
+		    	  
+		    	  electionmodel.add(new ElectionModel(rs.getString("Locality"),rs.getInt("ElectionId"),rs.getString("StartDate"),rs.getString("EndDate"),this.getElectionStatusByLocality(locatlty),this.getVotersCountByLocation(locatlty),this.GetCandiadtesForLocation(locatlty)));
+
+		          //Display values
+		          //System.out.print("ID: " + id);
+		          
+		       }
+		      rs.close();
+					
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		
+		
+		
+		return electionmodel;
+		
+		
+		
+	}
+
+	public List<VoterModel> getAllVotersList()
+	{
+		List<VoterModel> voters=new ArrayList<VoterModel>();
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql = "SELECT EmailId,AdharNumber,Age,Locality FROM users WHERE UserType=2";
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name
+		    	  
+		    	  
+		    	  voters.add(new VoterModel(rs.getString("EmailId"),rs.getString("AdharNumber"),rs.getInt("Age"),rs.getString("Locality")));
+
+		        
+		          
+		       }
+		      rs.close();
+					
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		
+		
+		
+		return voters;
+	}
+	
+	public int getVotersCountByLocation(String Locality)
+	{
+		int id=-1;
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql = "SELECT COUNT(UserID) as Count FROM users WHERE Locality='"+Locality+"'";
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name
+		           id = rs.getInt("Count");
+		          
+
+		          //Display values
+		          //System.out.print("ID: " + id);
+		          
+		       }
+		      rs.close();
+		      
+		      
+					
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		return id;
+	}
+	
+	
+	//return 0 error,1 success,2 already exists
+	public int AddCandidate(String CandidateName,String PartyName,String Locality)
+	{
+		int result=0;
+		try {
+			
+					stmt = conn.createStatement();
+					String sql;
+					
+					
+					sql="SELECT count(*)AS rowcount FROM candidates WHERE Locality='"+Locality+"' and CandidateParty='"+PartyName+"' and CandidateName='"+CandidateName+"'";
+					  ResultSet rs=stmt.executeQuery(sql);
+					  rs.next();
+					  int count = rs.getInt("rowcount");
+					  rs.close();
+					  if(count>0)
+					  {
+						  stmt.close();
+						  result= 2;
+					  }else
+					  {
+					
+					sql ="INSERT INTO candidates(CandidateName,CandidateParty,Locality,TotalVotes) VALUES ('"+CandidateName+"','"+PartyName+"','"+Locality+"',0)";
+					stmt.executeUpdate(sql);
+					stmt.close();
+					result= 1;
+					  }
+					
+			}		
+		catch(SQLException se){
+				//Handle errors for JDBC
+				se.printStackTrace();
+				
+		}catch(Exception e){
+			//Handle errors for Class.forName
+			e.printStackTrace();
+			
+		}
+		System.out.println(result);
+		return result;
+		
+	}
+
+	public List<String> getScheduleElectionLocalities()
+	{
+		List<String> locations=new ArrayList<String>();
+		try {
+			
+			stmt = conn.createStatement();
+		      String sql;
+		      sql="SELECT DISTINCT(Locality) FROM electionmaster";
+		      
+		      
+		      ResultSet rs = stmt.executeQuery(sql);
+		      while(rs.next()){
+		          //Retrieve by column name		           
+		    	  locations.add(new String(rs.getString("Locality")));
+
+		          
+		       }
+		      rs.close();
+		}		
+		catch(SQLException se){
+		      //Handle errors for JDBC
+		      se.printStackTrace();
+		   }catch(Exception e){
+		      //Handle errors for Class.forName
+		      e.printStackTrace();
+		   }
+		return locations;
+	}
+
+	
+}

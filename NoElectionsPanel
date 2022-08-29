@@ -1,0 +1,29 @@
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import java.awt.Font;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.SwingConstants;
+import java.awt.Color;
+
+public class NoElectionsPanel extends JPanel {
+
+	/**
+	 * Create the panel.
+	 */
+	public NoElectionsPanel() {
+		setBackground(Color.WHITE);
+		setLayout(null);
+		
+		JLabel label = new JLabel("No elections are scheduled.");
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		label.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		label.setBounds(0, 250, 790, 21);
+		add(label);
+
+	}
+
+}

@@ -1,0 +1,218 @@
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+public class UserDashboardPanel extends JPanel {
+
+	/**
+	 * Create the panel.
+	 */
+	String username;
+
+	public List<ElectionModel> elections;
+	public List<VoterModel> voters;
+	public JPanel panel = new JPanel();
+	DBRepoManager repo = new DBRepoManager();
+	JFrame frame;
+	public UserDashboardPanel(String username,JFrame frame) {
+		setBackground(Color.CYAN);
+		setLayout(null);
+		this.username = username;
+		this.frame = frame;
+//		elections = repo.getAllElectionDetails();
+
+
+		JLabel lblNewLabel = new JLabel("Online Voting System");
+		lblNewLabel.setForeground(Color.WHITE);
+		lblNewLabel.setFont(new Font("Algerian", Font.PLAIN, 25));
+		lblNewLabel.setBounds(10, 11, 378, 42);
+		add(lblNewLabel);
+
+
+//		viewElections(elections);
+		viewHome();
+
+		JButton btnViewElections = new JButton("View Elections");
+		btnViewElections.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				viewElections(elections);
+			}
+		});
+		btnViewElections.setBounds(10, 139, 160, 40);
+		add(btnViewElections);
+
+		JButton btnLogout = new JButton("Logout");
+		btnLogout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.setContentPane(new LoginPanel(frame));
+				frame.validate();
+				
+			}
+		});
+		btnLogout.setBounds(10, 190, 160, 40);
+		add(btnLogout);
+
+		JButton btnHome = new JButton("Home");
+		btnHome.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				viewHome();
+			}
+		});
+		btnHome.setBounds(10, 88, 160, 40);
+		add(btnHome);
+
+		JLabel bgLabel = new JLabel("");
+		ImageIcon imageIcon = new ImageIcon(new ImageIcon(this.getClass().getResource("bg.jpg")).getImage().getScaledInstance(1000, 700, Image.SCALE_SMOOTH));
+
+		bgLabel.setIcon(imageIcon);
+		bgLabel.setBounds(0, 0, 1000, 700);
+		add(bgLabel);
+		
+	}
+
+	public void viewElections(List<ElectionModel> elections) {
+		
+		elections = repo.getAllElectionDetails();
+
+		if (elections.size() == 0){
+			//Go to no elections panel
+			showNoElectionListPanel();
+
+		}else {
+			//Show the election list Panel
+			showElectionListPanel();
+		}
+	}
+
+
+	//	public void showScheduledElection() {
+	//		remove(panel);
+	//		panel = new ElectionCreation(this);
+	//		panel.setBounds(183, 85, 490, 332);
+	//		add(panel);
+	//		revalidate();
+	//		repaint();
+	//	}
+
+	public void showNoElectionListPanel() {
+		remove(panel);
+		panel = new NoElectionsPanel();
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+
+	}
+
+	public void showElectionListPanel() {
+		elections = repo.getAllElectionDetails();
+		remove(panel);
+		panel = new ElectionListPanel(elections,null,this);
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+
+	}
+
+	public void showElectionDetails(ElectionModel election) {
+		remove(panel);
+		panel = new ElectionDetails(election);
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+
+	}
+
+	public void showVotingPanel() {
+		remove(panel);
+		ElectionModel election = repo.getElectionDetailsuser(username);
+		panel = new VotingPanel(election,username, this);
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+
+
+
+	}
+
+	public void showAlreadyVotedPanel() {
+		remove(panel);
+		panel = new AlreadyVotedPanel("Your vote has been submitted successfully... :)");
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+
+	}
+	public void showMissedVotePanel() {
+		remove(panel);
+		panel = new AlreadyVotedPanel("Election schedule time is over");
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+
+	}
+
+	public void viewHome() {
+		int electionsCount = repo.scheduleElectionCOunt(username);
+		System.out.println(electionsCount);
+		int votingStatus = repo.UserVoted(username);
+		
+		if (electionsCount > 0) {
+			System.out.println("election count greater than zer0");
+
+			int electionStatus = repo.UserElectionStatus(username);
+			System.out.println(electionStatus);
+			switch (electionStatus) {
+			case 0:
+				showNoElectionListPanel();break;
+			case 1:
+				System.out.println("election cvalue 1");
+				if (votingStatus == 0) {
+					showVotingPanel();
+				}else {
+//					showMissedVotePanel();
+					showAlreadyVotedPanel();
+
+				}
+				break;
+			case 2:
+				
+				System.out.println("election cvalue 2");
+				System.out.println(electionStatus);
+				if (votingStatus == 0) {
+					showMissedVotePanel();
+				}else {
+
+					showAlreadyVotedPanel();
+				}
+				break;
+
+			}
+		}else {
+			System.out.println("Election not scheduled");
+			showNoElectionListPanel();
+
+		}
+	}
+
+}

@@ -1,0 +1,221 @@
+import javax.swing.*;
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.awt.event.ActionEvent;
+import java.awt.Font;
+
+public class LoginPanel extends JPanel {
+	private JTextField usernameTextField;
+	private JTextField passwordTextField;
+	public JFrame frame;
+	public static final Pattern VALID_EMAIL_ADDRESS_REGEX = 
+			Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
+	public static boolean validate(String emailStr) {
+		Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(emailStr);
+		return matcher.find();
+	}
+	/**
+	 * Create the panel.
+	 */
+	public LoginPanel(JFrame frame) {
+		setBackground(Color.WHITE);
+		setLayout(null);
+		this.frame = frame;
+
+		ImageIcon imageIcon = new ImageIcon(new ImageIcon(this.getClass().getResource("bg.jpg")).getImage().getScaledInstance(1000, 700, Image.SCALE_SMOOTH));
+
+		JLabel lblUsername = new JLabel("Username");
+		lblUsername.setForeground(Color.WHITE);
+		lblUsername.setBackground(Color.BLACK);
+		lblUsername.setFont(new Font("Calibri", Font.PLAIN, 24));
+		lblUsername.setBounds(362, 192, 147, 27);
+		add(lblUsername);
+
+		JLabel lblAdminLogin = new JLabel("Login");
+		lblAdminLogin.setFont(new Font("Algerian", Font.BOLD, 30));
+		lblAdminLogin.setForeground(Color.WHITE);
+		lblAdminLogin.setHorizontalAlignment(SwingConstants.CENTER);
+		lblAdminLogin.setBounds(362, 58, 322, 81);
+		add(lblAdminLogin);
+
+		usernameTextField = new JTextField();
+		usernameTextField.setBounds(491, 192, 197, 27);
+		add(usernameTextField);
+		usernameTextField.setColumns(10);
+
+		JLabel lblPassword = new JLabel("Password");
+		lblPassword.setForeground(Color.WHITE);
+		lblPassword.setFont(new Font("Calibri", Font.PLAIN, 24));
+		lblPassword.setBounds(362, 264, 105, 27);
+		add(lblPassword);
+
+		passwordTextField = new JPasswordField();
+		passwordTextField.setColumns(10);
+		passwordTextField.setBounds(491, 264, 193, 26);
+		add(passwordTextField);
+
+		JButton btnLogin = new JButton("login");
+		btnLogin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				loginAction();
+
+
+			}
+		});
+		btnLogin.setBounds(398, 388, 117, 29);
+		add(btnLogin);
+
+		JButton btnRegister = new JButton("Register");
+		btnRegister.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.setContentPane(new RegisterPanel(frame));
+				frame.validate();
+			}
+		});
+		btnRegister.setBounds(559, 388, 117, 29);
+		add(btnRegister);
+
+		JLabel bglabel = new JLabel("");
+
+		bglabel.setIcon(imageIcon);
+
+		bglabel.setBounds(0, 0, 1000, 700);
+		add(bglabel);
+
+	}
+
+	public void loginAction() {
+		String username = usernameTextField.getText();
+		String password = passwordTextField.getText();
+
+		if (!LoginPanel.validate(username)){
+			JOptionPane.showMessageDialog(frame, "Please enter valid email address");
+			usernameTextField.setText("");
+			passwordTextField.setText("");
+
+
+			return;
+		}		
+
+
+
+
+
+		DBRepoManager repo = new DBRepoManager();
+		int res = repo.ValidateLogin(username, password);
+		//		int res1=repo.UserElectionStatus(username);
+
+
+		//		List<CandidateModel> CM=repo.GetCandiadtesForUser(username);
+
+
+		switch (res){
+
+		case 1:
+			frame.setContentPane(new AdminDashboardPanel(frame));
+			frame.validate();
+			break;
+		case 2:
+			//if election is scheduled, go to Voting panel
+			//			int res1 = repo.UserElectionStatus(username);
+
+			frame.setContentPane(new UserDashboardPanel(username,frame));
+			frame.validate();
+			//			int electionsCount = repo.scheduleElectionCOunt(username);
+			//			System.out.println(electionsCount);
+			//			int votingStatus = repo.UserVoted(username);
+			//			if (electionsCount > 0) {
+			//				System.out.println("election count greater than zer0");
+			//
+			//				int electionStatus = repo.UserElectionStatus(username);
+			//				switch (electionStatus) {
+			//				case 0:
+			//					frame.setContentPane(new NoElectionsPanel());
+			//					frame.validate();
+			//				case 1:
+			//					
+			//					if (votingStatus == 0) {
+			//
+			//
+			//
+			//						ElectionModel election = repo.getElectionDetailsuser(username);
+			//						frame.setContentPane(new VotingPanel(election,username, frame));
+			//						frame.validate();
+			//					}else {
+			//
+			//						frame.setContentPane(new AlreadyVotedPanel("Your vote has been submitted successfully... :)"));
+			//						frame.validate();
+			//					}
+			//				case 2:
+			//					
+			//					if (votingStatus == 0) {
+			//						List<ElectionModel> elections = repo.getAllElectionDetails();
+			//						
+			////						frame.setContentPane(new ElectionListPanel(elections,null,this));
+			//						frame.validate();
+			//					}else {
+			//
+			//						frame.setContentPane(new AlreadyVotedPanel("Your vote has been submitted successfully... :)"));
+			//						frame.validate();
+			//					}
+			//					
+			//					
+			//				}
+			//				
+			//				
+			////				if(electionStatus == 0) {
+			////					frame.setContentPane(new NoElectionsPanel());
+			////					frame.validate();
+			////				}else {
+			////					
+			////
+			////				}
+			//
+			//
+			//
+			//
+			//			}else {
+			//				System.out.println("election count greater than zer0");
+			//
+			//				frame.setContentPane(new NoElectionsPanel());
+			//				frame.validate();
+			//			}
+
+
+
+			//			if ()
+
+			//			frame.setContentPane(new VotingPanel());
+			//			frame.validate();
+
+			//if election is done show already voted message if possbile show the voted person
+
+
+			//If election is not stareted show the upcoming election
+
+			//If no elections are scheduled then show no elections are scheduled 
+
+
+
+			break;
+		case 3:
+			//Show thw wrong password
+			JOptionPane.showMessageDialog(frame, "Please enter valid Creadentials");
+			usernameTextField.setText("");
+			passwordTextField.setText("");
+			break;
+		}
+
+	}
+
+	public void showElectionDetails(ElectionModel election) {
+		frame.setContentPane(new ElectionDetails(election));
+		frame.validate();
+	}
+}

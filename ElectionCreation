@@ -1,0 +1,120 @@
+import javax.swing.JPanel;
+import java.awt.Color;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
+import java.awt.Font;
+import javax.swing.JTextField;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.awt.event.ActionEvent;
+import com.toedter.calendar.JDateChooser;
+import java.util.Date;
+import java.util.List;
+
+import javax.swing.SwingConstants;
+import javax.swing.JComboBox;
+
+public class ElectionCreation extends JPanel {
+
+	/**
+	 * Create the panel.
+	 */
+	AdminDashboardPanel parentPanel;
+//	private JTextField localityTextField;
+	private List<String> localities;
+	public ElectionCreation(AdminDashboardPanel parentPanel) {
+		setBackground(Color.WHITE);
+		this.parentPanel = parentPanel;
+		setLayout(null);
+		DBRepoManager rep=new DBRepoManager();
+		localities = rep.getAllLocalities();
+
+		JLabel lblNewLabel = new JLabel("Schedule Election");
+		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 24));
+		lblNewLabel.setBounds(262, 34, 337, 28);
+		add(lblNewLabel);
+		
+		JLabel electionLocalityLabel = new JLabel("Election Locality");
+		electionLocalityLabel.setFont(new Font("Calibri", Font.PLAIN, 18));
+		electionLocalityLabel.setBounds(262, 107, 140, 14);
+		add(electionLocalityLabel);
+		
+		
+		String[] options = new String[localities.size()];
+		for (int i=0;i<localities.size();i++) {
+			options[i] = localities.get(i);
+		}
+		
+		JComboBox comboBox = new JComboBox(options);
+		comboBox.setBounds(432, 104, 139, 20);
+		add(comboBox);
+		
+		
+//		localityTextField = new JTextField();
+//		localityTextField.setBounds(432, 104, 139, 20);
+//		add(localityTextField);
+//		localityTextField.setColumns(10);
+		
+		
+		JDateChooser EndDateField = new JDateChooser();
+		EndDateField.setBounds(432, 228, 139, 20);
+		EndDateField.setDateFormatString("dd/MM/yyyy");
+
+		add(EndDateField);
+		
+		JDateChooser dateChooser = new JDateChooser();
+		dateChooser.setBounds(432, 165, 139, 20);
+		dateChooser.setDateFormatString("dd/MM/yyyy");
+		
+		add(dateChooser);
+		
+		JLabel lblStartDate = new JLabel("Start Date Time");
+		lblStartDate.setFont(new Font("Calibri", Font.PLAIN, 18));
+		lblStartDate.setBounds(262, 165, 258, 14);
+		add(lblStartDate);
+		
+		JLabel lblEndDateTime = new JLabel("End Date Time");
+		lblEndDateTime.setFont(new Font("Calibri", Font.PLAIN, 18));
+		lblEndDateTime.setBounds(262, 228, 258, 14);
+		add(lblEndDateTime);
+		
+		JButton scheduleButton = new JButton("Schedule");
+		scheduleButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//Date StartDate = dateChooser.getDate();
+				DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+				//System.out.println(df.format(dateChooser.getDate())+" 09:00:00");
+				
+				
+//				 SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");  
+//				    Date date = new Date();  
+
+//				//String StrDate=sdf.toString();
+				int res=rep.ScheduleElection(comboBox.getSelectedItem().toString(),df.format(dateChooser.getDate())+" 09:00:00", df.format(EndDateField.getDate())+" 17:00:00");
+				if(res==1)
+				{
+					dateChooser.setDate(null);
+					EndDateField.setDate(null);
+//					localityTextField.setText("");
+					JOptionPane.showMessageDialog(null, "Election scheduled successfully!!!");
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(null, "Something went wrong. make sure you entered valid Details.");
+				}
+			//parentPanel.showElectionDetails();
+			}
+		});
+		scheduleButton.setBounds(353, 308, 167, 23);
+		add(scheduleButton);
+		
+
+		
+		
+	}
+}

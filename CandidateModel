@@ -1,0 +1,50 @@
+public class CandidateModel {
+	
+	
+	public int getCandidateVotes() {
+		return CandidateVotes;
+	}
+
+
+
+	public void setCandidateVotes(int candidateVotes) {
+		CandidateVotes = candidateVotes;
+	}
+
+
+
+	/**
+	 * 
+	 */
+	public CandidateModel(String CandidateParty,String CandidateName,int CandidateVotes) {
+		super();
+		
+		
+		this.CandidateParty=CandidateParty;
+		this.CandidateName=CandidateName;
+		this.CandidateVotes=CandidateVotes;
+		
+	}
+	
+	
+	
+	public String getCandidateParty() {
+		return CandidateParty;
+	}
+	public void setCandidateParty(String candidateParty) {
+		CandidateParty = candidateParty;
+	}
+	public String getCandidateName() {
+		return CandidateName;
+	}
+	public void setCandidateName(String candidateName) {
+		CandidateName = candidateName;
+	}
+	
+
+	public String CandidateParty;
+	public String CandidateName;
+	public int CandidateVotes;
+	
+
+}

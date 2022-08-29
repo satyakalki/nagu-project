@@ -1,0 +1,20 @@
+import javax.swing.JPanel;
+import java.awt.Color;
+import javax.swing.JLabel;
+
+public class AlreadyVotedPanel extends JPanel {
+
+	/**
+	 * Create the panel.
+	 */
+	public AlreadyVotedPanel(String msg) {
+		setBackground(Color.WHITE);
+		setLayout(null);
+		
+		JLabel lblYourVoteHas = new JLabel(msg);
+		lblYourVoteHas.setBounds(217, 205, 424, 62);
+		add(lblYourVoteHas);
+
+	}
+
+}

@@ -1,0 +1,204 @@
+import javax.swing.JPanel;
+import javax.swing.JMenuBar;
+import java.awt.Color;
+import javax.swing.JMenu;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.lang.System;
+import java.util.List;;
+public class AdminDashboardPanel extends JPanel {
+
+	/**
+	 * Create the panel.
+	 */
+
+	public List<ElectionModel> elections;
+	public List<VoterModel> voters;
+	public JPanel panel = new JPanel();
+	DBRepoManager repo = new DBRepoManager();
+	JFrame frame;
+	public AdminDashboardPanel(JFrame frame) {
+		setBackground(new Color(0, 255, 255));
+		setLayout(null);
+		elections = repo.getAllElectionDetails();
+		this.frame = frame;
+
+		//get the list of elections
+
+
+
+
+
+		JButton btnScheduleelection = new JButton("ScheduleElection");
+		btnScheduleelection.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showScheduledElection();
+
+			}
+		});
+		btnScheduleelection.setBounds(10, 139, 160, 40);
+		add(btnScheduleelection);
+
+		JButton btnAddCandidates = new JButton("Add Candidates");
+		btnAddCandidates.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showAddCandidates();
+			}
+		});
+		btnAddCandidates.setBounds(10, 190, 160, 40);
+		add(btnAddCandidates);
+
+		JButton btnViewElections = new JButton("View Elections");
+		btnViewElections.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				elections = repo.getAllElectionDetails();
+
+				viewElections(elections);
+			}
+		});
+		btnViewElections.setBounds(10, 88, 160, 40);
+		add(btnViewElections);
+
+		JButton btnViewVoters = new JButton("View Voters");
+		btnViewVoters.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showVoterList();
+			}
+		});
+		btnViewVoters.setBounds(10, 241, 160, 40);
+		add(btnViewVoters);
+
+		JButton btnAddLocality = new JButton("Add Locality");
+		btnAddLocality.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showAddLocality();
+			}
+		});
+		btnAddLocality.setBounds(10, 292, 160, 40);
+		add(btnAddLocality);
+
+		JButton btnNewButton = new JButton("Logout");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.setContentPane(new LoginPanel(frame));
+				frame.validate();
+			}
+		});
+		btnNewButton.setBounds(10, 347, 160, 40);
+		add(btnNewButton);
+
+		JLabel lblNewLabel = new JLabel("Online Voting System");
+		lblNewLabel.setForeground(Color.WHITE);
+		lblNewLabel.setBackground(Color.WHITE);
+		lblNewLabel.setFont(new Font("Algerian", Font.PLAIN, 25));
+		lblNewLabel.setBounds(10, 0, 990, 80);
+		add(lblNewLabel);
+
+
+		viewElections(elections);
+
+		JLabel bgLabel = new JLabel("");
+		ImageIcon imageIcon = new ImageIcon(new ImageIcon(this.getClass().getResource("bg.jpg")).getImage().getScaledInstance(1000, 700, Image.SCALE_SMOOTH));
+
+		bgLabel.setIcon(imageIcon);
+		bgLabel.setBounds(0, 0, 1000, 700);
+		add(bgLabel);
+
+	}
+
+	public void viewElections(List<ElectionModel> elections) {
+		if (elections.size() == 0){
+			//Go to no elections panel
+			showNoElectionListPanel();
+
+		}else {
+			//Show the election list Panel
+			showElectionListPanel();
+		}
+	}
+
+
+	public void showScheduledElection() {
+		remove(panel);
+		panel = new ElectionCreation(this);
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+	}
+
+	public void showNoElectionListPanel() {
+		remove(panel);
+		panel = new NoElectionsPanel();
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+	}
+
+	public void showElectionListPanel() {
+		elections = repo.getAllElectionDetails();
+		System.out.println("size is "+elections.size());
+		remove(panel);
+		panel = new ElectionListPanel(elections,this,null);
+		panel.setBounds(180, 90, 790, 560);
+//		setComponentZOrder(panel,2);
+
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+	}
+
+	public void showElectionDetails(ElectionModel election) {
+		remove(panel);
+		panel = new ElectionDetails(election);
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+	}
+
+	public void showAddCandidates() {
+		remove(panel);
+		panel = new AddCandidate(this);
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+	}
+
+	public void showVoterList() { //VoterListPanel
+		voters = repo.getAllVotersList();
+		remove(panel);
+
+		panel = new VoterListPanel(voters);
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+	}
+
+	public void showAddLocality() {
+		remove(panel);
+
+		panel = new AddLocalityPanel();
+		panel.setBounds(180, 90, 790, 560);
+		add(panel);
+		revalidate();
+		repaint();
+		this.setComponentZOrder(panel, 1);
+	}
+
+}

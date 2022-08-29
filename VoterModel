@@ -1,0 +1,98 @@
+import java.awt.Color;
+import java.awt.Font;
+import java.util.List;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.border.EmptyBorder;
+
+public class VoterListPanel extends JPanel {
+
+
+	/**
+	 * Create the panel.
+	 */
+    DefaultListModel<ElectionModel> dm=new DefaultListModel<ElectionModel>();
+
+	public List<VoterModel> voters;
+
+	public VoterListPanel(List<VoterModel> voters) {
+		setBackground(Color.WHITE);
+//		JList<ElectionModel> jList1 = new JList<ElectionModel>();
+//		jList1.setVisibleRowCount(10);
+//		ElectionModel election1 = new ElectionModel("ELection 1",1,"23/33/4444","33/44/3333");
+//		ElectionModel election2 = new ElectionModel("ELection 2",1,"23/33/4444","33/44/3334");
+//		ElectionModel election3 = new ElectionModel("ELection 3",1,"23/33/4444","33/44/3335");
+//		ElectionModel election4 = new ElectionModel("ELection 4",1,"23/33/4444","33/44/3336");
+//		
+//		
+//		 dm.addElement(election1);
+//		 dm.addElement(election2);
+//		 dm.addElement(election3);
+//		 dm.addElement(election4);
+//	        //RENDER IMAGES N TEXT
+//	        jList1.setCellRenderer(new ElectionListRenderer());
+//	        jList1.setModel(dm);
+//		setLayout(null);
+		
+        setLayout(null);
+
+		
+		if (voters.isEmpty()) {
+			
+			
+			JLabel label = new JLabel("No Voters are registered.");
+			label.setHorizontalAlignment(SwingConstants.CENTER);
+			label.setFont(new Font("Tahoma", Font.PLAIN, 18));
+			label.setBounds(0, 250, 790, 21);
+			add(label);
+			return;
+		}
+		
+
+		  String[] columnNames = {"AADHAR", "Name","Age","Locality"};
+	        Object[][] data = new Object[voters.size()][4];
+	        
+	        for(int i=0;i<voters.size();i++) {
+	        	data[i][0] = voters.get(i).aadharnumber;
+	        	data[i][1] = voters.get(i).username;
+	        	data[i][2] = voters.get(i).age;
+	        	data[i][3] = voters.get(i).locality;
+	        }
+
+	        DefaultTableModel model = new DefaultTableModel(data, columnNames)
+	        {
+	            //  Returning the Class of each column will allow different
+	            //  renderers to be used based on Class
+	            public Class getColumnClass(int column)
+	            {
+	                return getValueAt(0, column).getClass();
+	            }
+	        };
+	        JTable table = new JTable( model );
+//	        table.setBorder(new EmptyBorder(1, 0, 0, 0));
+	        table.setPreferredScrollableViewportSize(table.getPreferredSize());
+			table.setDefaultEditor(Object.class, null);
+
+	        JScrollPane scrollPane = new JScrollPane( table );
+	    	scrollPane.setViewportBorder(null);
+			scrollPane.setBounds(0, 108, 790, 500);
+			scrollPane.getViewport().setBackground(Color.WHITE);
+			scrollPane.setBorder(new EmptyBorder(1, 0, 0, 0));
+			add(scrollPane);
+		
+
+			JLabel lblElections = new JLabel("Total Voters - "+voters.size());
+			lblElections.setHorizontalAlignment(SwingConstants.CENTER);
+			lblElections.setFont(new Font("Tahoma", Font.PLAIN, 24));
+
+			lblElections.setBounds(262, 35, 337, 28);
+			add(lblElections);
+
+	}
+}

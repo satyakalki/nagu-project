@@ -1,0 +1,213 @@
+import javax.swing.JPanel;
+import javax.swing.JFrame;
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.List;
+
+import javax.swing.JTextField;
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.ImageIcon;
+import java.awt.Font;
+import javax.swing.JComboBox;
+import javax.swing.JRadioButton;
+import javax.swing.JRadioButtonMenuItem;
+
+public class RegisterPanel extends JPanel {
+	private JTextField aadharTextField;
+	private JTextField usernameTextField;
+	private JTextField ageTextField;
+	private JTextField passwordTextField;
+	private JTextField confirmPasswordTextField;
+	private String HashKeyImage;
+	public JFrame frame;
+	private List<String> localities;
+	JComboBox comboBox,genderCombo;
+
+	/**
+	 * Create the panel.
+	 */
+	public RegisterPanel(JFrame frame) {
+		setBackground(Color.WHITE);
+		setLayout(null);
+		this.frame= frame;
+		
+		String[] options1 = {"Male","Female"};
+//		for (int i=0;i<localities.size();i++) {
+//			options[i] = localities.get(i);
+//		}
+		
+		
+		genderCombo = new JComboBox(options1);
+		genderCombo.setBounds(540, 259, 167, 28);
+		add(genderCombo);
+
+		JLabel genderLabel = new JLabel("Gender");
+		genderLabel.setForeground(Color.WHITE);
+		genderLabel.setFont(new Font("Calibri", Font.PLAIN, 24));
+		genderLabel.setBounds(339, 253, 191, 30);
+		add(genderLabel);
+		aadharTextField = new JTextField();
+		aadharTextField.setBounds(538, 150, 168, 30);
+		add(aadharTextField);
+		aadharTextField.setColumns(10);
+		localities = new DBRepoManager().getAllLocalities();
+
+		JLabel lblRegister = new JLabel("Registration Form");
+		lblRegister.setForeground(Color.WHITE);
+		lblRegister.setFont(new Font("Algerian", Font.PLAIN, 36));
+		lblRegister.setBounds(339, 30, 420, 80);
+		add(lblRegister);
+
+		JLabel lblAadhar = new JLabel("Aadhar");
+		lblAadhar.setFont(new Font("Calibri", Font.PLAIN, 24));
+		lblAadhar.setForeground(Color.WHITE);
+		lblAadhar.setBounds(342, 147, 191, 30);
+		add(lblAadhar);
+
+		JLabel lblUsername = new JLabel("Username");
+		lblUsername.setFont(new Font("Calibri", Font.PLAIN, 24));
+		lblUsername.setForeground(Color.WHITE);
+		lblUsername.setBounds(342, 202, 191, 30);
+		add(lblUsername);
+
+		JLabel lblAge = new JLabel("Age");
+		lblAge.setFont(new Font("Calibri", Font.PLAIN, 24));
+		lblAge.setForeground(Color.WHITE);
+		lblAge.setBounds(342, 305, 191, 30);
+		add(lblAge);
+
+		JLabel lblPassword = new JLabel("Password");
+		lblPassword.setFont(new Font("Calibri", Font.PLAIN, 24));
+		lblPassword.setForeground(Color.WHITE);
+		lblPassword.setBounds(342, 358, 191, 30);
+		add(lblPassword);
+
+		JLabel lblConfirmPassword = new JLabel("Confirm Password");
+		lblConfirmPassword.setFont(new Font("Calibri", Font.PLAIN, 24));
+		lblConfirmPassword.setForeground(Color.WHITE);
+		lblConfirmPassword.setBounds(342, 409, 191, 30);
+		add(lblConfirmPassword);
+
+		usernameTextField = new JTextField();
+		usernameTextField.setColumns(10);
+		usernameTextField.setBounds(538, 205, 168, 30);
+		add(usernameTextField);
+
+		ageTextField = new JTextField();
+		ageTextField.setColumns(10);
+		ageTextField.setBounds(538, 308, 168, 30);
+		add(ageTextField);
+
+		passwordTextField = new JTextField();
+		passwordTextField.setColumns(10);
+		passwordTextField.setBounds(538, 358, 168, 30);
+		add(passwordTextField);
+
+		confirmPasswordTextField = new JTextField();
+		confirmPasswordTextField.setColumns(10);
+		confirmPasswordTextField.setBounds(538, 409, 168, 30);
+		add(confirmPasswordTextField);
+
+		JButton btnRegister = new JButton("Register");
+		btnRegister.setBounds(370, 517, 117, 29);
+
+		btnRegister.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				registerAction();
+
+
+			}
+		});
+		add(btnRegister);
+
+		JButton selectButton = new JButton("Select File");
+		selectButton.setBounds(570, 517, 117, 29);
+
+		selectButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				String selectedFilePath = filePicker();
+
+				try {
+					InputStream imgstrm = null; 
+					ImageHashing img=new ImageHashing();
+					imgstrm=new FileInputStream(selectedFilePath);
+					HashKeyImage=img.getHash(imgstrm);
+					System.out.println(HashKeyImage);
+				}
+				catch(Exception e1)
+				{
+					System.out.println(e1);
+				}
+			}
+		});
+		add(selectButton);
+
+		JLabel label = new JLabel("");
+		ImageIcon imageIcon = new ImageIcon(new ImageIcon(this.getClass().getResource("bg.jpg")).getImage().getScaledInstance(1000, 700, Image.SCALE_SMOOTH));
+
+		JLabel labelLocality = new JLabel("Locality");
+		labelLocality.setForeground(Color.WHITE);
+		labelLocality.setFont(new Font("Calibri", Font.PLAIN, 24));
+		labelLocality.setBounds(339, 468, 191, 30);
+		add(labelLocality);
+		String[] options = new String[localities.size()];
+		for (int i=0;i<localities.size();i++) {
+			options[i] = localities.get(i);
+		}
+		comboBox = new JComboBox(options);
+		comboBox.setBounds(538, 471, 167, 28);
+		add(comboBox);
+
+		label.setIcon(imageIcon);
+		label.setBounds(0, 0, 1000, 700);
+		add(label);
+
+	}
+
+	public String filePicker() {
+		String filepath = null;
+		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+
+		int returnValue = jfc.showOpenDialog(null);
+		// int returnValue = jfc.showSaveDialog(null);
+
+		if (returnValue == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = jfc.getSelectedFile();
+			filepath = selectedFile.getAbsolutePath();
+			System.out.println(selectedFile.getAbsolutePath());
+		}
+
+
+
+		return filepath;
+	}
+
+	public void registerAction() {
+
+		DBRepoManager re = new DBRepoManager();
+
+		String username = usernameTextField.getText();
+		String password = passwordTextField.getText();
+		int age = Integer.parseInt(ageTextField.getText());
+		String aadhar = aadharTextField.getText();
+		String haskKey = HashKeyImage;
+		String Locality=comboBox.getSelectedItem().toString();
+		String Gender=genderCombo.getSelectedItem().toString();
+
+		int res = re.registerUser(username, password, aadhar, age, haskKey,Locality,Gender);
+
+		System.out.println(res);
+		frame.setContentPane(new LoginPanel(frame));
+		frame.validate();
+	}
+}

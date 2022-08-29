@@ -1,0 +1,232 @@
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JLabel;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Image;
+import java.util.List;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileSystemView;
+
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+public class VotingPanel extends JPanel {
+	private JTable table;
+
+	/**
+	 * Create the panel.
+	 */
+	
+	public ElectionModel election;
+	public String username;
+	DBRepoManager repo=new DBRepoManager();
+	public VotingPanel(ElectionModel election,String username,UserDashboardPanel parentpanel ) {
+		setBackground(Color.WHITE);
+		setLayout(null);
+		this.election = election;
+		this.username = username;
+		JLabel lblElectionDetails = new JLabel("Election Details");
+		lblElectionDetails.setFont(new Font("Tahoma", Font.PLAIN, 21));
+		lblElectionDetails.setBounds(250, 30, 192, 30);
+		add(lblElectionDetails);
+		
+		
+		  String[] columnNames = {"Candidate Name", "Party Name"};
+		  
+		  List<CandidateModel> candidates = election.candidates;
+		  
+		  Object[][] data = new Object[election.candidates.size()][2];
+		  
+		  for (int i = 0;i<election.candidates.size();i++) {
+			  data[i][0] = election.candidates.get(i).CandidateName;
+
+			  data[i][1] = election.candidates.get(i).CandidateParty;
+		  }
+		  
+		  
+		 
+		  
+//	        Object[][] data =
+//	        {
+//	            {"ELection 1",1,"23/33/4444","33/44/3333"},
+//	            {"ELection 1",1,"23/33/4444","33/44/3333"},
+//	            {"ELection 1",1,"23/33/4444","33/44/3333"},
+//	            {"ELection 1",1,"23/33/4444","33/44/3333"}
+//	        };
+
+	        DefaultTableModel model = new DefaultTableModel(data, columnNames)
+	        {
+	            //  Returning the Class of each column will allow different
+	            //  renderers to be used based on Class
+	            public Class getColumnClass(int column)
+	            {
+	                return getValueAt(0, column).getClass();
+	            }
+	        };
+	        setLayout(null);
+		
+		
+		
+		
+		JLabel lblStartdate = new JLabel("StartDate : "+election.stratDateTime);
+		lblStartdate.setBounds(29, 94, 236, 14);
+		add(lblStartdate);
+		
+		JLabel lblEnddate = new JLabel("EndDate : "+election.endDateTime);
+		lblEnddate.setBounds(458, 94, 179, 14);
+		add(lblEnddate);
+		
+		JButton btnVote = new JButton("Vote");
+		btnVote.setEnabled(false);
+		btnVote.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					int selectedRow = table.getSelectedRow();
+					System.out.println(election.electionName);
+					System.out.println(username);
+					System.out.println(election.candidates.get(selectedRow).CandidateParty);
+					System.out.println(election.candidates.get(selectedRow).CandidateName);
+					int res=repo.Vote(election.electionName, username, election.candidates.get(selectedRow).CandidateName, election.candidates.get(selectedRow).CandidateParty);
+					if (res == 1){
+						parentpanel.showAlreadyVotedPanel();
+					}else {
+						JOptionPane.showMessageDialog(null, "Somethig went wrong. Please try again");
+
+					}
+					
+					
+					
+				}catch (Exception ed){
+					JOptionPane.showMessageDialog(null, "Please select the candidate");
+				}
+				
+			}
+		});
+		btnVote.setBounds(465, 278, 110, 23);
+		add(btnVote);
+		
+		JLabel lblLocality = new JLabel("Locality : "+election.electionName);
+		lblLocality.setBounds(29, 127, 246, 14);
+		add(lblLocality);
+		
+		JLabel message = new JLabel("Please select the candidate to vote from the below list");
+		message.setBounds(29, 179, 515, 14);
+		add(message);
+		
+		JLabel lblNewLabel = new JLabel("");
+		lblNewLabel.setBounds(585, 247, 20, 19);
+
+		add(lblNewLabel);
+		
+		JButton btnBioMetric = new JButton("Bio Metric");
+		btnBioMetric.setEnabled(false);
+		btnBioMetric.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+//				public void actionPerformed(ActionEvent e) {
+					
+					String selectedFilePath = filePicker();
+					
+					try {
+						InputStream imgstrm = null; 
+						ImageHashing img=new ImageHashing();
+						imgstrm=new FileInputStream(selectedFilePath);
+						String HashKeyImage=img.getHash(imgstrm);
+						System.out.println(HashKeyImage);
+						String DBHashKey=repo.UserHashkey(username);
+						System.out.println(DBHashKey);
+						if (HashKeyImage.equals(DBHashKey)){
+							ImageIcon imageIcon = new ImageIcon(new ImageIcon(this.getClass().getResource("tick.png")).getImage().getScaledInstance(lblNewLabel.getWidth(), lblNewLabel.getHeight(), Image.SCALE_SMOOTH));
+
+							lblNewLabel.setVisible(true);
+							lblNewLabel.setIcon(imageIcon);
+							btnVote.setEnabled(true);
+						}else{
+							ImageIcon imageIcon = new ImageIcon(new ImageIcon(this.getClass().getResource("wrong.png")).getImage().getScaledInstance(lblNewLabel.getWidth(), lblNewLabel.getHeight(), Image.SCALE_SMOOTH));
+
+							lblNewLabel.setVisible(true);
+							lblNewLabel.setIcon(imageIcon);
+							btnVote.setEnabled(false);
+						}
+					
+						
+//						lblNewLabel.setVisible(true);
+
+					
+					}
+					catch(Exception e1)
+					{
+						System.out.println(e1);
+					}
+				}
+//			}
+		});
+		
+		btnBioMetric.setBounds(465, 243, 110, 23);
+		add(btnBioMetric);
+		
+		
+		
+		table = new JTable(model);
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println("mouse clicked");
+				
+				btnBioMetric.setEnabled(true);
+			}
+		});
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		table.setBackground(Color.WHITE);
+		table.setBounds(29, 228, 361, 203);
+
+		table.setDefaultEditor(Object.class, null);
+		
+		JScrollPane scrollPane = new JScrollPane( table );
+		scrollPane.setViewportBorder(null);
+		scrollPane.setBounds(29, 228, 361, 203);
+		scrollPane.getViewport().setBackground(Color.WHITE);
+		scrollPane.setBorder(new EmptyBorder(1, 0, 0, 0));
+		add(scrollPane);
+//		add(table);
+		
+//		JLabel endDateValueLabel = new JLabel("StartDate :");
+//		endDateValueLabel.setBounds(528, 94, 64, 14);
+//		add(endDateValueLabel);
+
+	}
+	
+	public String filePicker() {
+		String filepath = null;
+		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+
+		int returnValue = jfc.showOpenDialog(null);
+		// int returnValue = jfc.showSaveDialog(null);
+
+		if (returnValue == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = jfc.getSelectedFile();
+			filepath = selectedFile.getAbsolutePath();
+			System.out.println(selectedFile.getAbsolutePath());
+		}
+
+		
+		
+		return filepath;
+	}
+}

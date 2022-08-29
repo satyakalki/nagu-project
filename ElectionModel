@@ -1,0 +1,84 @@
+import java.util.List;
+
+public class ElectionModel{
+	public int getVotersCount() {
+		return VotersCount;
+	}
+
+	public void setVotersCount(int votersCount) {
+		VotersCount = votersCount;
+	}
+
+	public int getElectionStatus() {
+		return ElectionStatus;
+	}
+
+	public void setElectionStatus(int electionStatus) {
+		ElectionStatus = electionStatus;
+	}
+
+
+	public String electionName;
+	public int electionID;
+	public String stratDateTime;
+	public String endDateTime;
+	public int ElectionStatus;
+	public int VotersCount;
+	public List<CandidateModel> candidates;
+	
+	
+	public ElectionModel(String electionName, int electionID, String stratDateTime, String endDateTime,int ElectionStatus,int VotersCount,List<CandidateModel> candidates) {
+		super();
+		this.electionName = electionName;
+		this.electionID = electionID;
+		this.stratDateTime = stratDateTime;
+		this.endDateTime = endDateTime;
+		this.ElectionStatus=ElectionStatus;
+		this.VotersCount=VotersCount;
+		this.candidates = candidates;
+	}
+	
+	public ElectionModel()
+	{
+		
+	}
+	
+	 
+	public String getElectionName() {
+		return electionName;
+	}
+	public void setElectionName(String electionName) {
+		this.electionName = electionName;
+	}
+	public int getElectionID() {
+		return electionID;
+	}
+	public void setElectionID(int electionID) {
+		this.electionID = electionID;
+	}
+	public String getStratDateTime() {
+		return stratDateTime;
+	}
+	public void setStratDateTime(String stratDateTime) {
+		this.stratDateTime = stratDateTime;
+	}
+	public String getEndDateTime() {
+		return endDateTime;
+	}
+	public void setEndDateTime(String endDateTime) {
+		this.endDateTime = endDateTime;
+	}
+
+
+	public List<CandidateModel> getCandidates() {
+		return candidates;
+	}
+
+
+	public void setCandidates(List<CandidateModel> candidates) {
+		this.candidates = candidates;
+	}
+
+
+}
+

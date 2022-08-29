@@ -1,0 +1,234 @@
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.table.DefaultTableModel;
+
+import java.awt.Color;
+
+public class ElectionDetails extends JPanel {
+	private JTable table;
+
+	/**
+	 * Create the panel.
+	 */
+
+	String[] columnNames;
+	int[] Winner;
+	int totalnoofwinners=0;
+	Object[][] data;
+	int finalwinner;
+
+	public ElectionModel election;
+	DBRepoManager repo=new DBRepoManager();
+	public ElectionDetails(ElectionModel election) {
+		setBackground(Color.WHITE);
+		setLayout(null);
+		this.election = election;
+		JLabel lblElectionDetails = new JLabel("Election Details");
+
+		lblElectionDetails.setFont(new Font("Tahoma", Font.PLAIN, 24));
+		lblElectionDetails.setHorizontalAlignment(SwingConstants.CENTER);
+
+		lblElectionDetails.setBounds(262, 35, 337, 28);
+		add(lblElectionDetails);
+
+
+
+
+
+
+		if (election.ElectionStatus == 2) {
+			columnNames = new String[3];
+			//			columnNames = null;
+			columnNames[0] = "Candidate Name";
+			columnNames[1] = "Party Name";
+			columnNames[2] = "Votes Obtained";
+			Winner=new int[election.candidates.size()];
+
+
+		}else {
+			columnNames = new String[2];
+
+			columnNames[0] = "Candidate Name";
+			columnNames[1] = "Party Name";
+		}
+
+		List<CandidateModel> candidates = election.candidates;
+
+		System.out.println("size "+candidates.size());
+		if (election.ElectionStatus == 2) {
+			data = new Object[election.candidates.size()][3];
+		}else {
+			data = new Object[election.candidates.size()][2];
+		}
+
+
+		String winnername = "";
+		for (int i = 0;i<election.candidates.size();i++) {
+			data[i][0] = election.candidates.get(i).CandidateName;
+
+			data[i][1] = election.candidates.get(i).CandidateParty;
+			if (election.ElectionStatus == 2) {
+				data[i][2] = election.candidates.get(i).CandidateVotes;
+				Winner[i]=election.candidates.get(i).CandidateVotes;
+			}
+		}
+
+		if (election.ElectionStatus == 2) {
+			Arrays.sort(Winner);
+			finalwinner=Winner[election.candidates.size()-1];		 
+
+
+			System.out.println("highst votes:"+finalwinner);
+			for (int i = 0;i<election.candidates.size();i++) {
+				if(election.candidates.get(i).CandidateVotes==finalwinner) {
+					winnername = winnername +","+ election.candidates.get(i).CandidateName;
+					System.out.println("Winneres are"+election.candidates.get(i).CandidateName);
+					totalnoofwinners++;
+					//WinnersNameList.add(new String(election.candidates.get(i).CandidateName));
+				}
+
+			}
+		
+			if (totalnoofwinners == 1) {
+				
+				JLabel lblWinnerIs = new JLabel("Winner is");
+				lblWinnerIs.setForeground(Color.GRAY);
+				lblWinnerIs.setFont(new Font("Tahoma", Font.PLAIN, 24));
+				lblWinnerIs.setBounds(463, 229, 136, 20);
+				add(lblWinnerIs);
+				
+				JLabel lblMahesh = new JLabel(winnername.substring(1) );
+				lblMahesh.setForeground(new Color(0, 128, 0));
+				lblMahesh.setFont(new Font("Tahoma", Font.BOLD, 36));
+				lblMahesh.setBounds(463, 267, 236, 67);
+				add(lblMahesh);
+			}else {
+				JLabel lblWinnerIs = new JLabel("Draw between:");
+				lblWinnerIs.setForeground(Color.GRAY);
+				lblWinnerIs.setFont(new Font("Tahoma", Font.PLAIN, 24));
+				lblWinnerIs.setBounds(463, 229, 236, 50);
+				add(lblWinnerIs);
+				
+				JLabel lblMahesh = new JLabel(totalnoofwinners+"Candidates");
+				lblMahesh.setForeground(new Color(0, 228, 0));
+				lblMahesh.setFont(new Font("Tahoma", Font.BOLD, 36));
+				lblMahesh.setBounds(463, 267, 236, 67);
+				add(lblMahesh);
+				
+				JLabel lblwinnernames = new JLabel(winnername.substring(1));
+				lblwinnernames.setForeground(new Color(0, 128, 0));
+				lblwinnernames.setFont(new Font("Tahoma", Font.BOLD, 18));
+				lblwinnernames.setBounds(463, 297, 300, 67);
+				add(lblwinnernames);
+				
+				
+			}
+		}
+
+		DefaultTableModel model = new DefaultTableModel(data, columnNames)
+		{
+			//  Returning the Class of each column will allow different
+			//  renderers to be used based on Class
+			public Class getColumnClass(int column)
+			{
+				return getValueAt(0, column).getClass();
+			}
+		};
+		setLayout(null);
+
+
+
+
+		JLabel lblStartdate = new JLabel("StartDate : "+election.stratDateTime);
+		lblStartdate.setBounds(29, 94, 236, 14);
+		add(lblStartdate);
+
+		JLabel lblEnddate = new JLabel("EndDate : "+election.endDateTime);
+		lblEnddate.setBounds(550, 94, 179, 14);
+		add(lblEnddate);
+
+
+		JLabel lblLocality = new JLabel("Locality : "+election.electionName);
+		lblLocality.setBounds(29, 127, 246, 14);
+		add(lblLocality);
+
+
+		System.out.println("befor tab");
+		table = new JTable(model);
+
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		table.setBackground(Color.WHITE);
+		//		table.setBounds(29, 228, 361, 203);
+
+		table.setDefaultEditor(Object.class, null);
+		//		add(table);
+
+		JScrollPane scrollPane = new JScrollPane( table );
+		scrollPane.setViewportBorder(null);
+		scrollPane.setBounds(29, 228, 361, 203);
+		scrollPane.getViewport().setBackground(Color.WHITE);
+		scrollPane.setBorder(new EmptyBorder(1, 0, 0, 0));
+		add(scrollPane);
+
+		JLabel lblTotalNoOf = new JLabel("Total No Of Candidate : "+election.candidates.size());
+		lblTotalNoOf.setBounds(29, 164, 246, 14);
+		add(lblTotalNoOf);
+
+
+		int x=election.VotersCount;
+		int y=0;
+		for(int i=0;i<election.candidates.size();i++)
+		{
+
+			y=y+election.candidates.get(i).CandidateVotes;
+		}
+		if(y==0)
+			y=1;
+
+		//		System.out.println("my voters"+x+"space"+y +"perce"+(Floax/y*100));
+
+		DecimalFormat f = new DecimalFormat("##.00");
+
+		JLabel lblPolingPercentage = new JLabel("Polling Percentage : "+f.format(((float) y / (float) x)*100));
+		lblPolingPercentage.setBounds(549, 138, 246, 14);
+		add(lblPolingPercentage);
+
+
+
+
+		if (election.candidates.isEmpty()) {
+			scrollPane.setVisible(false);
+		}
+
+		if (election.getElectionStatus() != 2) {
+			lblPolingPercentage.setVisible(false);
+		}
+
+	}
+}
