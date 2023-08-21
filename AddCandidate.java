@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JComboBox;
 import javax.swing.SwingConstants;
 
+
 public class AddCandidate extends JPanel {
 	private JTextField candidateTextField;
 	private JTextField partyTextField;
