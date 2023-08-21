@@ -100,6 +100,7 @@ public class AddCandidate extends JPanel {
 				}
 				
 				//repo.AddCandidate(name, party, locality);
+				//demo
 			
 				
 			}
